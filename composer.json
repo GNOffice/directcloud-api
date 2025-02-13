@@ -1,0 +1,21 @@
+{
+    "name": "gn-office/directcloud-api",
+    "description": "A minimal implementation of DirectCloud API",
+    "type": "library",
+    "require": {
+        "php": "^8.1",
+        "guzzlehttp/guzzle": "^7.9"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "GNOffice\\DirectCloud\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "USUI Tomoaki",
+            "email": "t.usui@gn-office.pro"
+        }
+    ]
+}
