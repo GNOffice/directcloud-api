@@ -3,12 +3,10 @@
 
 namespace GNOffice\DirectCloud;
 
-use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GNOffice\DirectCloud\Exceptions\BadRequest;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Stream;
 use GuzzleHttp\Psr7\StreamWrapper;
 
@@ -171,6 +169,78 @@ class Client
         return $response['success'];
     }
 
+    public function renameFile(string $node, int $fileSeq, string $name): bool
+    {
+        $url = '/openapp/v1/files/rename/'.$node;
+
+        $parameters = [
+            'file_seq' => $fileSeq,
+            'name'     => $name
+        ];
+
+        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+
+        return $response['success'];
+    }
+
+    public function deleteFile(string $node, int $fileSeq): bool
+    {
+        $url = '/openapp/v1/files/delete/'.$node;
+
+        $parameters = [
+            'file_seq' => $fileSeq,
+        ];
+
+        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+
+        return $response['success'];
+    }
+
+    public function createFileLink(
+        int $targetSeq,
+        string $expirationDate,
+        string $password,
+        string $viewOption = 'both',
+        $limitCount = 0
+    ) {
+        $url = '/openapp/v1/links/create';
+
+        $parameters = [
+            'target_type'     => 'file',
+            'target_seq'      => $targetSeq,
+            'view_option'     => $viewOption,
+            'expiration_date' => $expirationDate,
+            'limit_count'     => $limitCount,
+            'password'        => $password,
+        ];
+        $response   = $this->v1Request('post', $url, 'form_params', $parameters);
+
+        return $response['url'];
+    }
+
+    public function createFolderLink(
+        int $targetSeq,
+        string $expirationDate,
+        string $password,
+        string $viewOption = 'both',
+        $limitCount = 0
+    ) {
+        $url = '/openapp/v1/links/create';
+
+        $parameters = [
+            'target_type'     => 'file',
+            'target_seq'      => $targetSeq,
+            'view_option'     => $viewOption,
+            'expiration_date' => $expirationDate,
+            'limit_count'     => $limitCount,
+            'password'        => $password,
+        ];
+
+        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+
+        return $response['url'];
+    }
+
     protected function v1Request(string $method, string $endpoint, string $requestOption = null, $parameters = [])
     {
         $options = [
@@ -217,34 +287,17 @@ class Client
 
         $options[$requestOption] = $parameters;
 
-        try {
-            var_dump($options);
-            $response = $this->client->request($method, $endpoint, $options);
-//            var_dump($response);
-            $json = json_decode($response->getBody(), true);
-//            var_dump($json);
+        $response = $this->client->request($method, $endpoint, $options);
+        $json     = json_decode($response->getBody(), true);
 
-            if (isset($json['result'])) {
-                if ($json['result'] !== 'success') {
-                    throw new BadRequest($response);
-                }
-            } elseif ($response->getBody() instanceof Stream) {
-                return StreamWrapper::getResource($response->getBody());
+        if (isset($json['result'])) {
+            if ($json['result'] !== 'success') {
+                throw new BadRequest($response);
             }
-
-        } catch (ClientException $exception) {
-            throw $this->determineException($exception);
+        } elseif ($response->getBody() instanceof Stream) {
+            return StreamWrapper::getResource($response->getBody());
         }
 
         return $json ?? [];
-    }
-
-    protected function determineException(ClientException $exception): Exception
-    {
-        if (in_array($exception->getResponse()->getStatusCode(), [400, 401, 403, 404, 500])) {
-            return new BadRequest($exception->getResponse());
-        }
-
-        return $exception;
     }
 }
