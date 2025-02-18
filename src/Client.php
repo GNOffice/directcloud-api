@@ -27,7 +27,7 @@ class Client
         $this->tokenProvider = $accessToken;
     }
 
-    public function getFolderList(string $node = '1{2')
+    public function getFolderList(string $node = '1{2'): array
     {
         $url = '/openapi/v2/folders/lists';
         $parameters = [
@@ -40,7 +40,7 @@ class Client
         return $response['data']['folders'];
     }
 
-    public function getFileList(string $node = '1{2')
+    public function getFileList(string $node = '1{2'): array
     {
         $url = '/openapi/v2/folders/lists';
         $parameters = [
@@ -62,7 +62,9 @@ class Client
             'node' => $node,
         ];
 
-        return $this->v2Request('put', $url, 'form_params', $parameters);
+        $response = $this->v2Request('put', $url, 'form_params', $parameters);
+
+        return $response['result'] === 'success';
     }
 
     public function download(int $fileSeq)
@@ -76,7 +78,7 @@ class Client
         return $this->v2Request('post', $url, 'json', $parameters);
     }
 
-    public function upload(string $node, $file, string $name = null)
+    public function upload(string $node, $file, string $name = null): array
     {
         $url = '/openapi/v2/files/upload/sync';
 
@@ -102,7 +104,7 @@ class Client
     }
 
 
-    public function copyFile(string $dstNode, string $srcNode, int $fileSeq): bool
+    public function copyFile(string $dstNode, string $srcNode, int $fileSeq): array
     {
         $url = '/openapi/v2/files/copy';
         $parameters = [
@@ -123,10 +125,12 @@ class Client
             'file_seq' => $fileSeq,
         ];
 
-        return $this->v2Request('put', $url, 'form_params', $parameters);
+        $response = $this->v2Request('put', $url, 'form_params', $parameters);
+
+        return $response['result'] === 'success';
     }
 
-    public function createFolder(string $node, string $name): bool
+    public function createFolder(string $node, string $name): array
     {
         $url = '/openapp/v1/folders/create/' . $node;
 
@@ -192,7 +196,8 @@ class Client
         string $password,
         string $viewOption = 'both',
         $limitCount = 0
-    ) {
+    ): string
+    {
         $url = '/openapp/v1/links/create';
 
         $parameters = [
@@ -214,7 +219,8 @@ class Client
         string $password,
         string $viewOption = 'both',
         $limitCount = 0
-    ) {
+    ): string
+    {
         $url = '/openapp/v1/links/create';
 
         $parameters = [
