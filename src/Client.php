@@ -62,9 +62,7 @@ class Client
             'node' => $node,
         ];
 
-        $response = $this->v2Request('put', $url, 'form_params', $parameters);
-
-        return $response['result'] === 'success';
+        return $this->v2Request('put', $url, 'form_params', $parameters);
     }
 
     public function download(int $fileSeq)
@@ -113,10 +111,7 @@ class Client
             'file_seq' => $fileSeq,
         ];
 
-        $response = $this->v2Request('put', $url, 'form_params', $parameters);
-
-        return $response['result'] === 'success';
-
+        return $this->v2Request('put', $url, 'form_params', $parameters);
     }
 
     public function moveFile(string $dstNode, string $srcNode, int $fileSeq): bool
@@ -128,10 +123,7 @@ class Client
             'file_seq' => $fileSeq,
         ];
 
-        $response = $this->v2Request('put', $url, 'form_params', $parameters);
-
-        return $response['result'] === 'success';
-
+        return $this->v2Request('put', $url, 'form_params', $parameters);
     }
 
     public function createFolder(string $node, string $name): bool
@@ -142,9 +134,7 @@ class Client
             'name' => $name
         ];
 
-        $response = $this->v1Request('post', $url, 'form_params', $parameters);
-
-        return $response['success'];
+        return $this->v1Request('post', $url, 'form_params', $parameters);
     }
 
     public function renameFolder(string $node, string $name): bool
@@ -287,7 +277,12 @@ class Client
 
         $options[$requestOption] = $parameters;
 
-        $response = $this->client->request($method, $endpoint, $options);
+        try {
+            $response = $this->client->request($method, $endpoint, $options);
+        } catch (ClientException $e) {
+            throw $e;
+        }
+
         $json     = json_decode($response->getBody(), true);
 
         if (isset($json['result'])) {
