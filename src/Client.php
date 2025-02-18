@@ -53,6 +53,20 @@ class Client
         return $response['data']['files'];
     }
 
+    public function getFolderInfo(string $node, int $dirSeq): array
+    {
+        $url = '/openapp/v1/folders/index/'.$node.'/'.$dirSeq;
+
+        return $this->v1Request('get', $url);
+    }
+
+    public function getFileInfo(string $node, int $fileSeq): array
+    {
+        $url = '/openapp/v1/files/index/'.$node.'/'.$fileSeq;
+
+        return $this->v1Request('get', $url);
+    }
+
     public function moveFolder(string $dstNode, string $srcNode, string $node): bool
     {
         $url = '/openapi/v2/folders/move';
