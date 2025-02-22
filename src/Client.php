@@ -27,7 +27,7 @@ class Client
         $this->tokenProvider = $accessToken;
     }
 
-    public function getFolderList(string $node = '1{2'): array
+    public function getList(string $node = '1{2'): array
     {
         $url = '/openapi/v2/folders/lists';
         $parameters = [
@@ -37,20 +37,7 @@ class Client
 
         $response = $this->v2Request('get', $url, 'query', $parameters);
 
-        return $response['data']['folders'];
-    }
-
-    public function getFileList(string $node = '1{2'): array
-    {
-        $url = '/openapi/v2/folders/lists';
-        $parameters = [
-            'node' => $node,
-            'limit' => 1000,
-        ];
-
-        $response = $this->v2Request('get', $url, 'query', $parameters);
-
-        return $response['data']['files'];
+        return $response['data'];
     }
 
     public function getFolderInfo(string $node, int $dirSeq): array
