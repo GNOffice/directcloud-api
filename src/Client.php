@@ -16,15 +16,33 @@ class Client
      * @var array|mixed
      */
     private ClientInterface $client;
+    protected ?string $service = null;
+    protected ?string $serviceKey = null;
+    protected ?string $accessKey = null;
+    protected ?string $code = null;
+    protected ?string $id = null;
+    protected ?string $password = null;
     private ?TokenProvider $tokenProvider = null;
 
-    public function __construct(TokenProvider $accessToken)
+    public function __construct(array|TokenProvider $accessInformation)
     {
+        if (count($accessInformation) === 3) {
+            [$this->service, $this->serviceKey, $this->accessKey] = $accessInformation;
+            $this->tokenProvider = new AccessKeyTokenProvider($this->service, $this->serviceKey, $this->accessKey);
+        } elseif (count($accessInformation) === 5) {
+            [$this->service, $this->serviceKey, $this->code, $this->id, $this->password] = $accessInformation;
+            $this->tokenProvider = new AccountInfoTokenProvider($this->service, $this->serviceKey, $this->code,
+                $this->id, $this->password);
+        }
+
+        if ($accessInformation instanceof TokenProvider) {
+            $this->tokenProvider = $accessInformation;
+        }
+
         $this->client = new GuzzleClient([
-            'base_uri' => 'https://api.directcloud.jp',
+            'base_uri' => 'https://api.directcloud.jp'
         ]);
 
-        $this->tokenProvider = $accessToken;
     }
 
     public function getList(string $node = '1{2'): array
