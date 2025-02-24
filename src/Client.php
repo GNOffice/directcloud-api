@@ -24,7 +24,7 @@ class Client
     protected ?string $password = null;
     private ?TokenProvider $tokenProvider = null;
 
-    public function __construct(array|TokenProvider $accessInformation, ?ClientInterface $client = null)
+    public function __construct(array|string|TokenProvider $accessInformation, ?ClientInterface $client = null)
     {
         if (is_array($accessInformation)) {
             if (count($accessInformation) === 3) {
@@ -35,6 +35,10 @@ class Client
                 $this->tokenProvider = new AccountInfoTokenProvider($this->service, $this->serviceKey, $this->code,
                     $this->id, $this->password);
             }
+        }
+
+        if (is_string($accessInformation)) {
+            $this->tokenProvider = new InMemoryTokenProvider($accessInformation);
         }
 
         if ($accessInformation instanceof TokenProvider) {
@@ -55,7 +59,7 @@ class Client
             'limit' => 1000,
         ];
 
-        $response = $this->v2Request('get', $url, 'query', $parameters);
+        $response = $this->v2Request('GET', $url, 'query', $parameters);
 
         return $response['data'];
     }
@@ -64,14 +68,14 @@ class Client
     {
         $url = '/openapp/v1/folders/index/'.$node.'/'.$dirSeq;
 
-        return $this->v1Request('get', $url);
+        return $this->v1Request('GET', $url);
     }
 
     public function getFileInfo(string $node, int $fileSeq): array
     {
         $url = '/openapp/v1/files/index/'.$node.'/'.$fileSeq;
 
-        return $this->v1Request('get', $url);
+        return $this->v1Request('GET', $url);
     }
 
     public function moveFolder(string $dstNode, string $srcNode, string $node): bool
@@ -83,7 +87,7 @@ class Client
             'node' => $node,
         ];
 
-        $response = $this->v2Request('put', $url, 'form_params', $parameters);
+        $response = $this->v2Request('PUT', $url, 'form_params', $parameters);
 
         return $response['result'] === 'success';
     }
@@ -96,7 +100,7 @@ class Client
             'flag_direct' => 'Y',
         ];
 
-        return $this->v2Request('post', $url, 'json', $parameters);
+        return $this->v2Request('POST', $url, 'json', $parameters);
     }
 
     public function upload(string $node, $file, string $name = null): array
@@ -121,7 +125,7 @@ class Client
             ];
         }
 
-        return $this->v2Request('post', $url, 'multipart', $parameters);
+        return $this->v2Request('POST', $url, 'multipart', $parameters);
     }
 
 
@@ -134,7 +138,7 @@ class Client
             'file_seq' => $fileSeq,
         ];
 
-        return $this->v2Request('put', $url, 'form_params', $parameters);
+        return $this->v2Request('PUT', $url, 'form_params', $parameters);
     }
 
     public function moveFile(string $dstNode, string $srcNode, int $fileSeq): bool
@@ -146,7 +150,7 @@ class Client
             'file_seq' => $fileSeq,
         ];
 
-        $response = $this->v2Request('put', $url, 'form_params', $parameters);
+        $response = $this->v2Request('PUT', $url, 'form_params', $parameters);
 
         return $response['result'] === 'success';
     }
@@ -159,7 +163,7 @@ class Client
             'name' => $name
         ];
 
-        return $this->v1Request('post', $url, 'form_params', $parameters);
+        return $this->v1Request('POST', $url, 'form_params', $parameters);
     }
 
     public function renameFolder(string $node, string $name): bool
@@ -170,7 +174,7 @@ class Client
             'name' => $name
         ];
 
-        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+        $response = $this->v1Request('POST', $url, 'form_params', $parameters);
 
         return $response['success'];
     }
@@ -179,7 +183,7 @@ class Client
     {
         $url = '/openapp/v1/folders/delete/' . $node;
 
-        $response = $this->v1Request('post', $url);
+        $response = $this->v1Request('POST', $url);
 
         return $response['success'];
     }
@@ -193,7 +197,7 @@ class Client
             'name'     => $name
         ];
 
-        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+        $response = $this->v1Request('POST', $url, 'form_params', $parameters);
 
         return $response['success'];
     }
@@ -206,7 +210,7 @@ class Client
             'file_seq' => $fileSeq,
         ];
 
-        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+        $response = $this->v1Request('POST', $url, 'form_params', $parameters);
 
         return $response['success'];
     }
@@ -229,7 +233,7 @@ class Client
             'limit_count'     => $limitCount,
             'password'        => $password,
         ];
-        $response   = $this->v1Request('post', $url, 'form_params', $parameters);
+        $response = $this->v1Request('POST', $url, 'form_params', $parameters);
 
         return $response['url'];
     }
@@ -253,7 +257,7 @@ class Client
             'password'        => $password,
         ];
 
-        $response = $this->v1Request('post', $url, 'form_params', $parameters);
+        $response = $this->v1Request('POST', $url, 'form_params', $parameters);
 
         return $response['url'];
     }
@@ -310,14 +314,16 @@ class Client
             throw $e;
         }
 
-        $json     = json_decode($response->getBody(), true);
+        $body = $response->getBody();
+
+        $json = json_decode($body, true);
 
         if (isset($json['result'])) {
             if ($json['result'] !== 'success') {
                 throw new BadRequest($response);
             }
-        } elseif ($response->getBody() instanceof Stream) {
-            return StreamWrapper::getResource($response->getBody());
+        } elseif ($body instanceof Stream) {
+            return StreamWrapper::getResource($body);
         }
 
         return $json ?? [];
