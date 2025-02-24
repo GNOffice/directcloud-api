@@ -24,22 +24,24 @@ class Client
     protected ?string $password = null;
     private ?TokenProvider $tokenProvider = null;
 
-    public function __construct(array|TokenProvider $accessInformation)
+    public function __construct(array|TokenProvider $accessInformation, ?ClientInterface $client = null)
     {
-        if (count($accessInformation) === 3) {
-            [$this->service, $this->serviceKey, $this->accessKey] = $accessInformation;
-            $this->tokenProvider = new AccessKeyTokenProvider($this->service, $this->serviceKey, $this->accessKey);
-        } elseif (count($accessInformation) === 5) {
-            [$this->service, $this->serviceKey, $this->code, $this->id, $this->password] = $accessInformation;
-            $this->tokenProvider = new AccountInfoTokenProvider($this->service, $this->serviceKey, $this->code,
-                $this->id, $this->password);
+        if (is_array($accessInformation)) {
+            if (count($accessInformation) === 3) {
+                [$this->service, $this->serviceKey, $this->accessKey] = $accessInformation;
+                $this->tokenProvider = new AccessKeyTokenProvider($this->service, $this->serviceKey, $this->accessKey);
+            } elseif (count($accessInformation) === 5) {
+                [$this->service, $this->serviceKey, $this->code, $this->id, $this->password] = $accessInformation;
+                $this->tokenProvider = new AccountInfoTokenProvider($this->service, $this->serviceKey, $this->code,
+                    $this->id, $this->password);
+            }
         }
 
         if ($accessInformation instanceof TokenProvider) {
             $this->tokenProvider = $accessInformation;
         }
 
-        $this->client = new GuzzleClient([
+        $this->client = $client ?? new GuzzleClient([
             'base_uri' => 'https://api.directcloud.jp'
         ]);
 
