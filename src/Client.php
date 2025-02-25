@@ -215,7 +215,8 @@ class Client
         return $response['success'];
     }
 
-    public function createFileLink(
+    public function createLink(
+        string $targetType,
         int $targetSeq,
         string $expirationDate,
         string $password,
@@ -226,37 +227,13 @@ class Client
         $url = '/openapp/v1/links/create';
 
         $parameters = [
-            'target_type'     => 'file',
+            'target_type' => $targetType,
             'target_seq'      => $targetSeq,
             'view_option'     => $viewOption,
             'expiration_date' => $expirationDate,
             'limit_count'     => $limitCount,
             'password'        => $password,
         ];
-        $response = $this->v1Request('POST', $url, 'form_params', $parameters);
-
-        return $response['url'];
-    }
-
-    public function createFolderLink(
-        int $targetSeq,
-        string $expirationDate,
-        string $password,
-        string $viewOption = 'both',
-        $limitCount = 0
-    ): string
-    {
-        $url = '/openapp/v1/links/create';
-
-        $parameters = [
-            'target_type'     => 'file',
-            'target_seq'      => $targetSeq,
-            'view_option'     => $viewOption,
-            'expiration_date' => $expirationDate,
-            'limit_count'     => $limitCount,
-            'password'        => $password,
-        ];
-
         $response = $this->v1Request('POST', $url, 'form_params', $parameters);
 
         return $response['url'];
