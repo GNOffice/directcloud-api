@@ -7,8 +7,6 @@ use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GNOffice\DirectCloud\Exceptions\BadRequest;
-use GuzzleHttp\Psr7\Stream;
-use GuzzleHttp\Psr7\StreamWrapper;
 
 class Client
 {
@@ -292,15 +290,14 @@ class Client
         }
 
         $body = $response->getBody();
-
         $json = json_decode($body, true);
 
         if (isset($json['result'])) {
             if ($json['result'] !== 'success') {
                 throw new BadRequest($response);
             }
-        } elseif ($body instanceof Stream) {
-            return StreamWrapper::getResource($body);
+        } else {
+            echo $body;
         }
 
         return $json ?? [];
