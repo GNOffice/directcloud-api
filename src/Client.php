@@ -237,7 +237,7 @@ class Client
         return $response['url'];
     }
 
-    protected function v1Request(string $method, string $endpoint, string $requestOption = null, $parameters = [])
+    public function v1Request(string $method, string $endpoint, string $requestOption = null, $parameters = [])
     {
         $options = [
             'headers' => [
@@ -268,7 +268,7 @@ class Client
         return $json ?? [];
     }
 
-    protected function v2Request(string $method, string $endpoint, string $requestOption, $parameters = [], $extraHeaders = [])
+    public function v2Request(string $method, string $endpoint, string $requestOption, $parameters = [], $extraHeaders = [])
     {
         $options = [
             'headers' => [
