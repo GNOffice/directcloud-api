@@ -297,7 +297,7 @@ class Client
                 throw new BadRequest($response);
             }
         } else {
-            echo $body;
+            return (string) $body;
         }
 
         return $json ?? [];
