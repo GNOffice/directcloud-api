@@ -1,6 +1,11 @@
 {
     "name": "gn-office/directcloud-api",
     "description": "A minimal implementation of DirectCloud API",
+    "keywords": [
+        "directcloud-api",
+        "directcloud",
+        "api"
+    ],
     "type": "library",
     "require": {
         "php": "^8.1",
